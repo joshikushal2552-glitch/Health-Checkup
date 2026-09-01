@@ -29,6 +29,7 @@ import os
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import sessionmaker
 
 from models import Base
@@ -58,7 +59,15 @@ def get_engine(url=None):
     if _engine is not None and _engine_url == resolved:
         return _engine
     if resolved.startswith("sqlite"):
-        os.makedirs(_INSTANCE_DIR, exist_ok=True)
+        # Create the parent directory of whatever file the resolved URL
+        # actually points to - not the hardcoded default _INSTANCE_DIR, which
+        # is read-only on a serverless deployment once IMAGING_DATABASE_URL
+        # has been overridden to point elsewhere (e.g. /tmp on Vercel).
+        db_file = make_url(resolved).database
+        if db_file and db_file != ":memory:":
+            parent_dir = os.path.dirname(db_file)
+            if parent_dir:
+                os.makedirs(parent_dir, exist_ok=True)
         _engine = create_engine(resolved, connect_args={"check_same_thread": False})
     else:
         _engine = create_engine(resolved, pool_pre_ping=True)
