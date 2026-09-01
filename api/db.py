@@ -47,7 +47,16 @@ def get_db(path=None):
         return conn
     if conn is not None:
         conn.close()
-    conn = sqlite3.connect(db_path, check_same_thread=False)
+    parent_dir = os.path.dirname(db_path)
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
+    try:
+        conn = sqlite3.connect(db_path, check_same_thread=False)
+    except sqlite3.OperationalError as exc:
+        raise sqlite3.OperationalError(
+            f"{exc} (resolved DATABASE_PATH={db_path!r}; "
+            f"DATABASE_PATH env var={os.environ.get('DATABASE_PATH')!r})"
+        ) from exc
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     _local.conn = conn
