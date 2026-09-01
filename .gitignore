@@ -39,3 +39,4 @@ marketing_media/assets/*
 
 # Reconstructed study volumes and masks - contain pixel data, never committed
 instance/
+.vercel

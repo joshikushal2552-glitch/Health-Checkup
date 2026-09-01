@@ -1,9 +1,17 @@
 import io
 import os
+import sys
 import uuid
 import base64
 import threading
 from datetime import datetime, timezone
+
+# Vercel's Python runtime imports this file as a module rather than running it
+# as a script, so the automatic sys.path[0] = script-dir behavior that makes
+# `python api/index.py` resolve sibling imports (lung_segmentation, db, auth,
+# etc.) does not happen there. Add this file's own directory explicitly so
+# those sibling imports work in both environments.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import numpy as np
 import pydicom

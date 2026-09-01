@@ -1,6 +1,5 @@
 Flask
 groq
-pandas
 python-dotenv
 pydicom
 numpy
